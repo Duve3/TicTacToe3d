@@ -4,8 +4,9 @@ from ui import CUColor
 
 
 class Menu:
-    def __init__(self, screen: ui.CScreen):
+    def __init__(self, screen: ui.CScreen, debug: bool = False):
         self.screen = screen
+        self.debug = debug
 
         # TODO: add buttons for entering game, do NOT work hard on this menu, priority is the acutal game!!
 
