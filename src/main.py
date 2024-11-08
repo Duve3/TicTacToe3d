@@ -16,4 +16,4 @@ def main(skip=False, debug=False):
 
 
 if __name__ == "__main__":
-    main(skip=True, debug=True)
+    main(skip=True, debug=False)

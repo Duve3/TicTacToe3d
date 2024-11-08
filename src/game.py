@@ -10,9 +10,6 @@ class PossibleObjects(Enum):
     TIE = "t"
 
 
-
-
-
 class TicTacToe:
     """
     TicTacToe Object
@@ -30,6 +27,19 @@ class TicTacToe:
     def update_state(self, row, col, result):
         self.state[row][col] = result
 
+    def draw(self, screen: pygame.Surface, image_tictactoe, image_x, image_o, pos_x, pos_y):
+        screen.blit(image_tictactoe, (pos_x, pos_y))
+        for y, row in enumerate(self.state):
+            for x, obj in enumerate(row):
+                if obj == PossibleObjects.EMPTY:
+                    continue
+
+                if obj == PossibleObjects.X:
+                    screen.blit(image_x, (x * 100, y * 100))
+
+                elif obj == PossibleObjects.O:
+                    screen.blit(image_o, (x * 100, y * 100))
+
     def __repr__(self):
         return f"""
 {self.state[0][0].value} {self.state[0][1].value} {self.state[0][2].value}
@@ -37,7 +47,6 @@ class TicTacToe:
 {self.state[2][0].value} {self.state[2][1].value} {self.state[2][2].value}                
                 """
     def completed_game(self) -> PossibleObjects:
-        # TODO: figure out how to check if anyone has won the game
         """
         There is only four/five possible ways to win, either you have a row up, row down, row left, row right, or row diagonal
 
@@ -108,13 +117,19 @@ class Game:
         self.screen = screen
         self.debug = debug
 
-        self.game_list = self.game_list = [
+        self.game_list = [
             [TicTacToe(), TicTacToe(), TicTacToe()],
             [TicTacToe(), TicTacToe(), TicTacToe()],
             [TicTacToe(), TicTacToe(), TicTacToe()]
                       ]
 
+        # TODO: fix how the images aren't scaled correctly, find good values, also make image bliting work for X's and O's
+        current = '\\'.join(__file__.split('\\')[:-1])
+        self.IMAGE_TicTacToe = pygame.transform.scale(pygame.image.load(f"{current}/assets/TicTacToeBoard.png"), (125, 125))
+        self.IMAGE_TicX = pygame.transform.scale(pygame.image.load(f"{current}/assets/TicTacToeX.png"), (100, 100))
+        self.IMAGE_TicO = pygame.transform.scale(pygame.image.load(f"{current}/assets/TicTacToeO.png"), (100, 100))
 
+        # debug stuff, tests if tictactoe board works
         if self.debug:
             import random  # to optimize we will NOT important random unless debug
             self.reset_game()
@@ -198,6 +213,13 @@ class Game:
                     self.screen.close(kill=True)
 
             self.screen.fill(CUColor.BLACK())
+
+            for y, row in enumerate(self.game_list):
+                for x, obj in enumerate(row):
+                    # we are using self.screen.surface rather than self.screen.draw() bc
+                    # I would rather not implement that in the UI lib and implement it in the actual code
+                    print(x * 50, y * 50)
+                    obj.draw(self.screen.surface, self.IMAGE_TicTacToe, self.IMAGE_TicX, self.IMAGE_TicO, 25 + x * 210, 25 + y * 210)
 
             pygame.display.flip()
 
