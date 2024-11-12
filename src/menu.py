@@ -17,7 +17,7 @@ class Menu:
                 if event.type == pygame.QUIT:
                     self.screen.close(kill=True)
 
-            self.screen.fill(CUColor.WHITE())
+            self.screen.fill(CUColor.BLUE())
 
 
 

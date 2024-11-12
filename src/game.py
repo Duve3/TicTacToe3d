@@ -1,3 +1,11 @@
+"""
+game.py
+
+the game
+i plan to make it so in the top left it says whose turn it currently is
+i plan to make it zoom in on whatever is tile is being actively used
+^ this zoom in feature means we have to implement a camera now... sigh.
+"""
 import pygame
 import ui
 from ui import CUColor
@@ -15,7 +23,8 @@ class TicTacToe:
     TicTacToe Object
     Handles the micro TicTacToe parts, simplifies coding
     """
-    def __init__(self):
+    def __init__(self):  # TODO: put more data in the __init__ class rather than the draw class
+        # TODO: switch to surfaces? it would be better for scaling than images and would allow more features than raw images (hit boxes, etc)
         self.state = [
             [PossibleObjects.EMPTY, PossibleObjects.EMPTY, PossibleObjects.EMPTY],
             [PossibleObjects.EMPTY, PossibleObjects.EMPTY, PossibleObjects.EMPTY],
@@ -24,10 +33,13 @@ class TicTacToe:
 
         self.victory = PossibleObjects.EMPTY
 
+        self.last_drawn = (-1, -1)
+        self.size = (-1, -1)
+
     def update_state(self, row, col, result):
         self.state[row][col] = result
 
-    def draw(self, screen: pygame.Surface, image_tictactoe, image_x, image_o, pos_x, pos_y):
+    def draw(self, screen: pygame.Surface, image_tictactoe: pygame.Surface, image_x, image_o, pos_x, pos_y):
         screen.blit(image_tictactoe, (pos_x, pos_y))
         for y, row in enumerate(self.state):
             for x, obj in enumerate(row):
@@ -40,7 +52,16 @@ class TicTacToe:
                 elif obj == PossibleObjects.O:
                     screen.blit(image_o, (x * 100, y * 100))
 
+        self.last_drawn = (pos_x, pos_y)
+        self.size = image_tictactoe.size
+
+    def in_hitbox(self, offset, mx, my):
+        hitbox = pygame.Rect(self.last_drawn[0] - offset, self.last_drawn[1] - offset, self.size[0], self.size[1])
+
     def __repr__(self):
+        """
+        Useful for debugging, prints the current values exactly
+        """
         return f"""
 {self.state[0][0].value} {self.state[0][1].value} {self.state[0][2].value}
 {self.state[1][0].value} {self.state[1][1].value} {self.state[1][2].value}
@@ -125,7 +146,8 @@ class Game:
 
         # TODO: fix how the images aren't scaled correctly, find good values, also make image bliting work for X's and O's
         current = '\\'.join(__file__.split('\\')[:-1])
-        self.IMAGE_TicTacToe = pygame.transform.scale(pygame.image.load(f"{current}/assets/TicTacToeBoard.png"), (125, 125))
+        self.IMAGE_TicTacToe = pygame.transform.scale(pygame.image.load(f"{current}/assets/TicTacToeBoard.png"), (150, 150))
+        self.IMAGE_TicTacToeMegaBoard = pygame.transform.scale(pygame.image.load(f"{current}/assets/TicTacToeBoard.png"), (600, 600))
         self.IMAGE_TicX = pygame.transform.scale(pygame.image.load(f"{current}/assets/TicTacToeX.png"), (100, 100))
         self.IMAGE_TicO = pygame.transform.scale(pygame.image.load(f"{current}/assets/TicTacToeO.png"), (100, 100))
 
@@ -207,19 +229,25 @@ class Game:
 
     def run(self):
         while True:
+            self.screen.tick()
+
             events = pygame.event.get()
             for event in events:
                 if event.type == pygame.QUIT:
                     self.screen.close(kill=True)
 
-            self.screen.fill(CUColor.BLACK())
+            self.screen.fill(CUColor.WHITE())
+
+            offset = 15
 
             for y, row in enumerate(self.game_list):
                 for x, obj in enumerate(row):
                     # we are using self.screen.surface rather than self.screen.draw() bc
                     # I would rather not implement that in the UI lib and implement it in the actual code
                     print(x * 50, y * 50)
-                    obj.draw(self.screen.surface, self.IMAGE_TicTacToe, self.IMAGE_TicX, self.IMAGE_TicO, 25 + x * 210, 25 + y * 210)
+                    obj.draw(self.screen.surface, self.IMAGE_TicTacToe, self.IMAGE_TicX, self.IMAGE_TicO, offset + x * 210, offset + y * 210)
+
+            self.screen.draw(self.IMAGE_TicTacToeMegaBoard, (0, 0))
 
             pygame.display.flip()
 
